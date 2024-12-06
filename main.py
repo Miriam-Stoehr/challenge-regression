@@ -116,46 +116,30 @@ def main():
 
     """Assigning variables, splitting test and training set & standardizing features"""
 
-    y = df[target]
-    X = FeatureUtils.select_features(df, features=features)
+    y = df[target].values  # Convert to NumPy array for compatibility with k-fold
+    X = FeatureUtils.select_features(df, features=features).values
 
-    # Convert data to float for standardization
-    X = X.astype(float)
+    # Perform k-fold cross-validation
+    n_splits = 5
+    n_neighbors = 5
 
-    # Split data
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    results = ModelUtils.cross_validate(X, y, n_splits=n_splits, n_neighbors=n_neighbors)
+    metrics = results["metrics"]
+    y_true = results["y_true"]
+    y_pred = results["y_pred"]
 
-    # Standardize Features
-    X_train_scaled = ModelUtils.standardize_data(X_train, set_type='train')
-    X_test_scaled = ModelUtils.standardize_data(X_test, set_type='test')
+    # Print metrics
+    print("\nCross-Validation Metrics (Averaged):")
+    for dataset, dataset_metrics in metrics.items():
+        print(f"\n{dataset.capitalize()} Metrics:")
+        for metric, value in dataset_metrics.items():
+            print(f"{metric}: {value:.4f}")
 
+    # Plot predictions vs true values
+    ModelUtils.plot_predictions(y_true, y_pred, title="Cross-Validation Predictions vs True Values")
 
-    """Training the Model, Making Predictions & Evaluating"""
-
-    # Train the Model
-    ModelUtils.train_model(X_train_scaled, y_train, n_neighbors=5)
-
-    # Make Predictions
-    y_train_pred = ModelUtils.predict(X_train_scaled)
-    y_test_pred = ModelUtils.predict(X_test_scaled)
-
-    # Evaluate on the training set
-    train_metrics = ModelUtils.evaluate(y_train, y_train_pred)
-    print("Training Metrics:")
-    for metric, value in train_metrics.items():
-        print(f"{metric}: {value:.4f}")
-    
-    # Evaluate on the test set
-    test_metrics = ModelUtils.evaluate(y_test, y_test_pred)
-    print("\nTest Metrics:")
-    for metric, value in test_metrics.items():
-        print(f"{metric}: {value:.4f}")
-    
-    # Plot predictions vs true values for the test set
-    ModelUtils.plot_predictions(y_test, y_test_pred, title="Test Set Predictions vs True Values")
-
-    # Print sample of predictions vs true values
-    ModelUtils.print_sample_predictions(y_test, y_test_pred, num_samples=10)
+    # Print a sample of predictions
+    ModelUtils.print_sample_predictions(y_true, y_pred, num_samples=10)
 
 if __name__ == "__main__":
     main()
