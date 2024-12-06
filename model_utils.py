@@ -78,14 +78,18 @@ class ModelUtils:
         r2 = r2_score(y_true, y_pred)
         mse = mean_squared_error(y_true, y_pred)
         rmse = np.sqrt(mse)
+        mape = np.mean(np.abs((y_true - y_pred) / y_true)) * 100
+        smape = np.mean(2 * np.abs(y_true - y_pred) / (np.abs(y_true) + np.abs(y_pred))) * 100
 
         return {
             "Mean Absolute Error (MAE)": mae,
-            "Mean Squared Error (MSE)": mse,
             "Root Mean Squared Error (RMSE)": rmse,
-            "R Squared": r2
+            "Mean Squared Error (MSE)": mse,
+            "R Squared": r2,
+            "Mean Absolute Percentage Error (MAPE)": mape,
+            "Symmetric Mean Absolute Percentage Error (sMAPE)": smape
         }
-    
+
     @staticmethod
     def plot_predictions(y_true: np.ndarray, y_pred: np.ndarray, title: str = 'Predictions vs True Values') -> None:
         """
