@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from typing import Any, Dict, Union
+from typing import Any, Dict
 from sklearn.model_selection import KFold
 from sklearn.preprocessing import StandardScaler
 from sklearn.neighbors import KNeighborsRegressor

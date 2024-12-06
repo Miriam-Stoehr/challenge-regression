@@ -1,7 +1,6 @@
 from data_utils import DataUtils
 from feature_utils import FeatureUtils
 from model_utils import ModelUtils
-from sklearn.model_selection import train_test_split
 
 def main():
     # Import data
