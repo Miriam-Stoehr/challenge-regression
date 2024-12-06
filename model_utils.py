@@ -1,3 +1,4 @@
+import time
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -66,6 +67,10 @@ class ModelUtils:
         all_y_true = []  # Collect true values
         all_y_pred = []  # Collect predictions
 
+        # Track training and inference time
+        total_train_time = 0
+        total_inference_time = 0
+
         for train_index, test_index in kf.split(X):
             X_train, X_test = X[train_index], X[test_index]
             y_train, y_test = y[train_index], y[test_index]
@@ -74,14 +79,22 @@ class ModelUtils:
             X_train_scaled = cls._scaler.fit_transform(X_train)
             X_test_scaled = cls._scaler.transform(X_test)
 
-            # Train the model
+            # Train Model & Measure training time
+            start_train_time = time.time()
             cls._model = KNeighborsRegressor(n_neighbors=n_neighbors, weights='distance')
             cls._model.fit(X_train_scaled, y_train)
+            end_train_time = time.time()
+            train_time = end_train_time - start_train_time
+            total_train_time += train_time
 
-            # Predict on training and test sets
+            # Predict on training and test sets & Measure inference time
+            start_inference_time = time.time()
             y_train_pred = cls._model.predict(X_train_scaled)
             y_test_pred = cls._model.predict(X_test_scaled)
-
+            end_inference_time = time.time()
+            inference_time = end_inference_time - start_inference_time
+            total_inference_time += inference_time
+            
             # Collect predictions for the test set
             all_y_true.extend(y_test)
             all_y_pred.extend(y_test_pred)
@@ -110,6 +123,8 @@ class ModelUtils:
             "metrics": averaged_metrics,
             "y_true": np.array(all_y_true),
             "y_pred": np.array(all_y_pred),
+            "train_time": total_train_time,
+            "inference_time": total_inference_time,
         }
 
     @staticmethod

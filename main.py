@@ -139,6 +139,8 @@ def main():
     metrics = results["metrics"]
     y_true = results["y_true"]
     y_pred = results["y_pred"]
+    train_time = results["train_time"]
+    inference_time = results["inference_time"]
 
     # Print metrics
     print("\nCross-Validation Metrics (Averaged):")
@@ -146,6 +148,10 @@ def main():
         print(f"\n{dataset.capitalize()} Metrics:")
         for metric, value in dataset_metrics.items():
             print(f"{metric}: {value:.4f}")
+    
+    # Print training and inference times
+    print(f"\nTraining Time: {train_time:.4f} seconds")
+    print(f"Inference Time: {inference_time:.4f} seconds")
 
     # Plot predictions vs true values
     ModelUtils.plot_predictions(y_true, y_pred, title="Cross-Validation Predictions vs True Values")
