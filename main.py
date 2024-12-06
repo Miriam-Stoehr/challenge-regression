@@ -5,7 +5,7 @@ from model_utils import ModelUtils
 def main():
     # Import data
     file_path = "./data/real_estate.csv"
-    df = DataUtils.import_csv(file_path)
+    df = DataUtils.import_data(file_path)
 
 
     """Data Cleaning"""
@@ -21,7 +21,6 @@ def main():
 
     # Drop outliers in price & garden (IQR), 'living_area (<=12), 'facade_number' (>=6), bedroom_nr (>=24) -> compared to other data points, don't seem realistic
     df = DataUtils.drop_outliers(df, 'price')
-    df = DataUtils.drop_outliers(df, 'garden')
     df = DataUtils.drop_outliers(df, 'living_area', lower_bound=12)
     df = DataUtils.drop_outliers(df, 'facade_number', upper_bound=6)
     df = DataUtils.drop_outliers(df, 'bedroom_nr', upper_bound=24)
@@ -108,9 +107,23 @@ def main():
     # Use Standard Ordinal Encoding on communes
     df = FeatureUtils.encode_ordinal(df, column='commune')
 
+
+    """ Importing External Data"""
+
+    # Import external datasets (refnis code and taxable income per commune)
+    refnis_df = DataUtils.import_data("./data/postal_refnis_conv.xlsx")
+    income_df = DataUtils.import_data("./data/taxable_income.xlsx")
+
+    # Merge Refnis code and taxable income from external datasets in current df
+    df = FeatureUtils.merge_data(df, refnis_df, import_col=['Postal code', 'Refnis code'], join_left='zip_code', join_right='Postal code')
+    df = FeatureUtils.merge_data(df, income_df, import_col=['NIS code', 'Total net taxable income', 'Average values', 'Prosperity index'], join_left='Refnis code', join_right='NIS code')
+
+    # Rename columns
+    df = FeatureUtils.rename_columns(df, columns={'Refnis code': 'refnis_code', 'Total net taxable income': 'com_tot_income', 'Average values': 'com_avg_income', 'Prosperity index': 'com_prosp_index'})
+
     # Select features for ML model & split data
     target = 'price'
-    features = ['commune_encoded', 'living_area', 'building_condition_encoded', 'terrace_encoded', 'equipped_kitchen_encoded', 'subtype_of_property_encoded', 'garden']
+    features = ['commune_encoded', 'living_area', 'building_condition_encoded', 'terrace_encoded', 'equipped_kitchen_encoded', 'subtype_of_property_encoded', 'com_avg_income']
 
 
     """Assigning variables, splitting test and training set & standardizing features"""

@@ -7,7 +7,7 @@ class DataUtils:
     """
 
     @staticmethod
-    def import_csv(file_path: str) -> pd.DataFrame:
+    def import_data(file_path: str) -> pd.DataFrame:
         """
         Imports a CSV file into a DataFrame.
 
@@ -17,7 +17,10 @@ class DataUtils:
         Returns:
             pd.DataFrame: The imported data.
         """
-        return pd.read_csv(file_path)
+        if 'csv' in file_path:
+            return pd.read_csv(file_path)
+        if 'xlsx' in file_path:
+            return pd.read_excel(file_path)
 
     @staticmethod
     def export_csv(df: pd.DataFrame, file_path: str) -> None:

@@ -75,7 +75,7 @@ class ModelUtils:
             X_test_scaled = cls._scaler.transform(X_test)
 
             # Train the model
-            cls._model = KNeighborsRegressor(n_neighbors=n_neighbors)
+            cls._model = KNeighborsRegressor(n_neighbors=n_neighbors, weights='distance')
             cls._model.fit(X_train_scaled, y_train)
 
             # Predict on training and test sets

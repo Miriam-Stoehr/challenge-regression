@@ -66,8 +66,7 @@ class FeatureUtils:
         """
         df[f'{column}_encoded'] = df[column].map(mapping)
         return df
-
-
+    
     @classmethod
     def encode_ordinal(cls, df: pd.DataFrame, column: str) -> pd.DataFrame:
         """
@@ -86,6 +85,42 @@ class FeatureUtils:
         df[f'{column}_encoded'] = encoder.fit_transform(df[[column]])
         return df
     
+    @classmethod
+    def merge_data(cls, curr_df: pd.DataFrame, ext_df: pd.DataFrame, import_col: list, join_left: str, join_right: str) -> pd.DataFrame:
+        """
+        Merges columns from an external dataframe into the current dataframe and drops external columns on which the merge is performed.
+
+        Args:
+            curr_df (pd.DataFrame): Current DataFrame.
+            ext_df (pd.DataFrame): External DataFrame.
+            import_col (list): List of columns to import.
+            join_left (str): Column of the current df based on which the merge should be performed.
+            join_right (str): Column of the external df based on which the merge should be performed.
+        
+        Returns:
+            pd.DataFrame: Updated DataFrame.
+        """
+        # Merge colums from ext_df in curr_df based on stated column
+        updated_df = pd.merge(curr_df, ext_df[import_col], left_on=join_left, right_on=join_right, how='left')
+        # Drop external column on which the merge happened
+        updated_df = updated_df.drop(columns=[join_right])
+        return updated_df
+
+    @classmethod
+    def rename_columns(cls, df: pd.DataFrame, columns: dict) -> pd.DataFrame:
+        """
+        Renames specified columns according to a given dictionary.
+
+        Args:
+            df (pd.DataFrame): Input DataFrame.
+            column (dict): Dictionary that maps old and new column names.
+        
+        Returns:
+            pd.DataFrame: Updated DataFrame.
+        """
+        updated_df = df.rename(columns=columns)
+        return updated_df
+
     @classmethod
     def convert_dtype(cls, df: pd.DataFrame, column: str, conv_type: str) -> pd.DataFrame:
         """
