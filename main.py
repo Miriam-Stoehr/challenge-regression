@@ -121,9 +121,18 @@ def main():
     # Rename columns
     df = FeatureUtils.rename_columns(df, columns={'Refnis code': 'refnis_code', 'Total net taxable income': 'com_tot_income', 'Average values': 'com_avg_income', 'Prosperity index': 'com_prosp_index'})
 
+    # Clustering based on communes and taxable income
+    df = FeatureUtils.cluster_dbscan(
+        df,
+        columns=['com_avg_income', 'commune_encoded'],
+        new_column='commune_income_cluster',
+        eps=0.2,
+        min_samples=4
+    )
+
     # Select features for ML model & split data
     target = 'price'
-    features = ['commune_encoded', 'living_area', 'building_condition_encoded', 'terrace_encoded', 'equipped_kitchen_encoded', 'subtype_of_property_encoded', 'com_avg_income']
+    features = ['commune_encoded', 'living_area', 'building_condition_encoded', 'terrace_encoded', 'equipped_kitchen_encoded', 'subtype_of_property_encoded', 'com_avg_income', 'commune_income_cluster']
 
 
     """Assigning variables, splitting test and training set & standardizing features"""

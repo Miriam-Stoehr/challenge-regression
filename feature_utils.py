@@ -1,5 +1,7 @@
 import pandas as pd
-from sklearn.preprocessing import OrdinalEncoder
+from sklearn.preprocessing import OrdinalEncoder, StandardScaler
+from sklearn.cluster import DBSCAN
+from typing import List
 
 class FeatureUtils:
     @classmethod
@@ -86,14 +88,14 @@ class FeatureUtils:
         return df
     
     @classmethod
-    def merge_data(cls, curr_df: pd.DataFrame, ext_df: pd.DataFrame, import_col: list, join_left: str, join_right: str) -> pd.DataFrame:
+    def merge_data(cls, curr_df: pd.DataFrame, ext_df: pd.DataFrame, import_col: List[str], join_left: str, join_right: str) -> pd.DataFrame:
         """
         Merges columns from an external dataframe into the current dataframe and drops external columns on which the merge is performed.
 
         Args:
             curr_df (pd.DataFrame): Current DataFrame.
             ext_df (pd.DataFrame): External DataFrame.
-            import_col (list): List of columns to import.
+            import_col (List[str]): List of columns to import.
             join_left (str): Column of the current df based on which the merge should be performed.
             join_right (str): Column of the external df based on which the merge should be performed.
         
@@ -136,6 +138,44 @@ class FeatureUtils:
         """
         df[column] = df[column].astype(conv_type)
         return df
+    
+    @staticmethod
+    def cluster_dbscan(df: pd.DataFrame, columns: List[str], new_column: str, eps: float, min_samples: int) -> pd.DataFrame:
+        """
+        Build clusters based on the given columns. Resulting clusters will be labeled in descending order based on the first column given, with highest label number corresponding to highest value.
+
+        Args:
+            df (pd.DataFrame): Input DataFrame.
+            clolumns (List[str]): List of columns to be used for clustering.
+            eps (float): Epsilon value for DBSCAN (max. distance for neighbors).
+            min_samples (int): Minimum number of samples to form a cluster.
+        
+        Returns:
+            pd.DataFrame: DataFrame including an additional column for the clusters.
+        """
+        # Normalize features
+        scaler = StandardScaler()
+        scaled_features = scaler.fit_transform(df[columns])
+
+        #Apply DBSCAN
+        dbscan = DBSCAN(eps=eps, min_samples=min_samples)
+        df[new_column] = dbscan.fit_predict(scaled_features)
+
+        # Get the unique cluster labels and reverse them
+        unique_labels = sorted(df[new_column].unique(), reverse=True)
+        label_mapping = {old_label: new_label for old_label, new_label in zip(sorted(df[new_column].unique()), unique_labels)}
+
+        # Map the reversed labels back to the original DataFrame
+        df[f'{new_column}_reversed'] = df[new_column].map(label_mapping)
+
+        # Drop column with original order
+        df = df.drop(columns=[new_column])
+
+        # Rename reversed column
+        df = df.rename(columns={f'{new_column}_reversed': new_column})
+
+        return df
+
 
     @classmethod
     def select_features(cls, df: pd.DataFrame, features: list) -> pd.DataFrame:
@@ -151,3 +191,5 @@ class FeatureUtils:
         """
         df_selected = df[features]
         return df_selected
+
+    
