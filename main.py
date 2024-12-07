@@ -153,11 +153,29 @@ def main():
     print(f"\nTraining Time: {train_time:.4f} seconds")
     print(f"Inference Time: {inference_time:.4f} seconds")
 
-    # Plot predictions vs true values
-    ModelUtils.plot_predictions(y_true, y_pred, title="Cross-Validation Predictions vs True Values")
+    # Compute distance-based analysis
+    X_scaled = ModelUtils._scaler.transform(X)
+    avg_distances = ModelUtils.calculate_avg_neighbor_distances(X_scaled)
+    print("\nAverage Neighbor Distances (First 10 Instances):")
+    print(avg_distances[:10])
+
+    # Compute permutation importance
+    permutation_scores = ModelUtils.permutation_importance(X_scaled, y, n_repeats=10)
+    print("\nPermutation Importance Scores:")
+    for feature_idx, importance in permutation_scores.items():
+        print(f"Feature {features[feature_idx]}: {importance:.4f}")
+
+    # Plot distribution of average distances
+    ModelUtils.plot_avg_neighbor_distances(avg_distances)
+
+    # Plot permutation importance
+    ModelUtils.plot_permutation_importance(permutation_scores, features)
 
     # Print a sample of predictions
     ModelUtils.print_sample_predictions(y_true, y_pred, num_samples=10)
+
+    # Plot predictions vs true values
+    ModelUtils.plot_predictions(y_true, y_pred, title="Cross-Validation Predictions vs True Values")
 
 if __name__ == "__main__":
     main()

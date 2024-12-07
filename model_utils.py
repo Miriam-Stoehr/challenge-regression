@@ -2,7 +2,8 @@ import time
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from typing import Any, Dict
+import seaborn as sns
+from typing import Any, Dict, List
 from sklearn.model_selection import KFold
 from sklearn.preprocessing import StandardScaler
 from sklearn.neighbors import KNeighborsRegressor
@@ -164,3 +165,102 @@ class ModelUtils:
 
         print("\nSample Predictions:")
         print(sample_df.to_string(index=False, float_format="{:.2f}".format))
+    
+    @staticmethod
+    def calculate_avg_neighbor_distances(X_test_scaled: np.ndarray) -> np.ndarray:
+        """
+        Calculate the average distances of test points to their k-nearest neighbors.
+
+        Args:
+            X_test_scaled (np.ndarray): Scaled test features.
+
+        Returns:
+            np.ndarray: Average distances for each test instance.
+        """
+        distances, _ = ModelUtils._model.kneighbors(X_test_scaled)
+        avg_distances = distances.mean(axis=1)
+        return avg_distances
+    
+    @staticmethod
+    def plot_avg_neighbor_distances(avg_distances: List[float]) -> None:
+        """
+        Visualize the distribution of average neighbor distances.
+
+        Args:
+            avg_distances (List[float]): A list of average distances to nearest neighbors for test instances.
+        
+        Returns:
+            None: This function generates a histogram plot with a KDE (Kerne Density Estimate).
+        """
+        plt.figure(figsize=(10, 6))
+        sns.histplot(avg_distances, kde=True, bins=30, color='skyblue')
+        plt.title("Distribution of Average Neighbor Distances", fontsize=16)
+        plt.xlabel("Average Distances", fontsize=14)
+        plt.ylabel("Frequency", fontsize=14)
+        plt.grid(alpha=0.4)
+        plt.show()
+
+    @staticmethod
+    def permutation_importance(X: np.ndarray, y: np.ndarray, n_repeats: int = 10) -> Dict[str, float]:
+        """
+        Compute permutation importance for features.
+
+        Args:
+            X (np.ndarray): Feature set.
+            y (np.ndarray): Target values.
+            n_repeats (int): Number of shuffling repetitions.
+        
+        Returns:
+            Dict[str, float]: Importance scores for each feature.
+        """
+        baseline_score = r2_score(y, ModelUtils._model.predict(X))
+        importances = []
+
+        for i in range(X.shape[1]):
+            shuffled_scores = []
+            for _ in range(n_repeats):
+                X_shuffled = X.copy()
+                np.random.shuffle(X_shuffled[:, i])  # Shuffle column i
+                score = r2_score(y, ModelUtils._model.predict(X_shuffled))
+                shuffled_scores.append(baseline_score - score)
+            
+            avg_importance = np.mean(shuffled_scores)
+            importances.append(avg_importance)
+        
+        return dict(zip(range(X.shape[1]), importances))
+    
+    @staticmethod
+    def plot_permutation_importance(permutation_scores: Dict[int, float], feature_names: List[str]) -> None:
+        """
+        Visualize feature importance based on permutation scores.
+        
+        Args:
+            permutation_scores (Dict[int, float]): A dictionary where the keys are feature indices 
+                                                and the values are the computed importance scores.
+            feature_names (List[str]): A list of feature names corresponding to the feature indices.
+        
+        Returns:
+            None: This function generates a horizontal bar chart to display feature importance.
+        
+        Example:
+            feature_names = ['price', 'latitude', 'longitude', 'living_area', 'garden', 
+                            'subtype_of_property', 'building_condition', 'equipped_kitchen', 
+                            'terrace', 'swimming_pool', 'facade_number']
+            
+            permutation_scores = ModelUtils.permutation_importance(X_scaled, y, n_repeats=10)
+            plot_permutation_importance(permutation_scores, feature_names)
+        """
+        # Sort permutation scores by importance (descending order)
+        sorted_importances = sorted(permutation_scores.items(), key=lambda x: x[1], reverse=True)
+        features, importances = zip(*sorted_importances)
+        feature_labels = [feature_names[i] for i in features]
+        
+        # Plot horizontal bar chart
+        plt.figure(figsize=(12, 6))
+        plt.barh(feature_labels, importances, color='teal')
+        plt.title("Permutation Feature Importance", fontsize=16)
+        plt.xlabel("Importance Score", fontsize=14)
+        plt.ylabel("Features", fontsize=14)
+        plt.gca().invert_yaxis()  # Invert y-axis for better visualization
+        plt.grid(alpha=0.4)
+        plt.show()
