@@ -32,6 +32,8 @@ def main():
     df = DataUtils.correct_value(df, column='commune', old_value='Petit-Rulx-lez-Nivelles', new_value='Petit-Rœulx-lez-Nivelles')
 
 
+
+
     """Data Encoding & Feature Engineering"""
 
     # Change 'terrace' to binary -> due to many instances when surface not given
@@ -107,8 +109,7 @@ def main():
     # Use Standard Ordinal Encoding on communes
     df = FeatureUtils.encode_ordinal(df, column='commune')
 
-
-    """ Importing External Data"""
+    """ Feature Engineering Based on External Data"""
 
     # Import external datasets (refnis code and taxable income per commune)
     refnis_df = DataUtils.import_data("./data/postal_refnis_conv.xlsx")
@@ -130,9 +131,12 @@ def main():
         min_samples=4
     )
 
+    # TODO: 
+    df.to_csv("./data/real_estate_encoded.csv")
+
     # Select features for ML model & split data
     target = 'price'
-    features = ['commune_encoded', 'living_area', 'building_condition_encoded', 'terrace_encoded', 'equipped_kitchen_encoded', 'subtype_of_property_encoded', 'com_avg_income', 'commune_income_cluster']
+    features = ['commune_encoded', 'zip_code', 'living_area', 'building_condition_encoded', 'terrace_encoded', 'equipped_kitchen_encoded', 'subtype_of_property_encoded', 'com_avg_income', 'commune_income_cluster']
 
 
     """Assigning variables, splitting test and training set & standardizing features"""
