@@ -131,12 +131,13 @@ def main():
         min_samples=4
     )
 
-    # TODO: 
-    df.to_csv("./data/real_estate_encoded.csv")
-
     # Select features for ML model & split data
     target = 'price'
     features = ['commune_encoded', 'zip_code', 'living_area', 'building_condition_encoded', 'terrace_encoded', 'equipped_kitchen_encoded', 'subtype_of_property_encoded', 'com_avg_income', 'commune_income_cluster']
+
+    # TODO: 
+    df = df[['price', 'commune_encoded', 'zip_code', 'living_area', 'building_condition_encoded', 'terrace_encoded', 'equipped_kitchen_encoded', 'subtype_of_property_encoded', 'com_avg_income', 'commune_income_cluster']]
+    df.to_csv("./data/real_estate_selected.csv")
 
 
     """Assigning variables, splitting test and training set & standardizing features"""
@@ -172,7 +173,7 @@ def main():
     print("\nAverage Neighbor Distances (First 10 Instances):")
     print(avg_distances[:10])
 
-    # Compute permutation importance
+"""    # Compute permutation importance
     permutation_scores = ModelUtils.permutation_importance(X_scaled, y, n_repeats=10)
     print("\nPermutation Importance Scores:")
     for feature_idx, importance in permutation_scores.items():
@@ -188,7 +189,7 @@ def main():
     ModelUtils.print_sample_predictions(y_true, y_pred, num_samples=10)
 
     # Plot predictions vs true values
-    ModelUtils.plot_predictions(y_true, y_pred, title="Cross-Validation Predictions vs True Values")
+    ModelUtils.plot_predictions(y_true, y_pred, title="Cross-Validation Predictions vs True Values")"""
 
 if __name__ == "__main__":
     main()
