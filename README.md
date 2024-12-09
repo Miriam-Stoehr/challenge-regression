@@ -68,6 +68,8 @@ challenge-regression/
 ├── data/                               # Folder containing datasets
 │   ├── real_estate.csv                 # Original dataset
 │   ├── real_estate_w_coordinates.csv   # Dataset with added latitude and longitude
+│   ├── postal_refnix_conv.xlsx         # Dataset with mapping of Belgian NIS and postal codes
+│   └── taxable_income.xlsx             # Dataset regarding taxable income per Belgian commune
 ├── graphs/                             # Folder for saving performance graphs
 │   ├── predictions.png                 # Predictions vs true values graph
 │   ├── distances.png                   # Distance analysis graph
@@ -124,7 +126,7 @@ Ensure you have the following software installed:
 
 ## File Descriptions
 
-* `main.py`: Contains the main script to run the data pipeline, train the model, and generate performance outputs. Uses the dataset augmented with latitude and longitude columns `real_estate_w_coordinates.csv`.
+* `main.py`: Contains the main script to run the data pipeline, train the model, and generate performance outputs. Uses the dataset augmented with latitude and longitude columns `real_estate_w_coordinates.csv` as well as the files containing data on Belgian NIS codes (`postal_refnis_conv.xlsx`) and taxable income per commune (`taxable_income.xlsx`).
 
 * `data_utils.py`: Provides a utility class and methods for data cleaning and preprocessing tasks such as handling missing values, dropping outliers, and merging external datasets.
 
@@ -133,7 +135,7 @@ Ensure you have the following software installed:
 * `model_utils.py`: Contains methods for splitting and standardizing the dataset, fitting the KNN model, evaluating its performance, and visualizing results.
 
 * `coordinates.py`: 
-  * Fetches longitude and latitude for location-based features (e.g. communes) and implements the coordinates in the given DataFrame.
+  * Fetches longitude and latitude for location-based features (e.g. communes) and implements the coordinates in the given DataFrame resulting from `real_estate.csv`.
   * Generates:
     * `real_estate_w_coordinates.csv`: Dataset including the fetched latitude and longitude values, used in `main.py`.
     * A dictionary of city names and their coordinates for feature engineering (calculation of distance to nearest city).
@@ -142,6 +144,13 @@ Ensure you have the following software installed:
 
 * `config.py`: Contains parameters and file paths that can be adjusted if required.
 
+## Visualizations
+
+<img src="graphs/predictions.png" alt="Cross-Validation Prediction vs True Values" width="300">
+
+<img src="graphs/avg_distances.png" alt="Distribution of Average Neighbor Distances" width="300">
+
+<img src="graphs/permuation_importance.png" alt="Permutation Feature Importance" width="300">
 
 ## Contributors
 

@@ -110,7 +110,7 @@ def main():
 
     """Split test and training set & standardize features"""
     # Assign target and feature variables (convert to NumPy array for compatibility with k-fold)
-    y = df[TARGET].values  
+    y = df[TARGET].values
     X = df[FEATURES].values
 
     # Train model & perform k-fold cross-validation
