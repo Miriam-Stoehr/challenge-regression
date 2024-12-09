@@ -9,11 +9,13 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
+
 class ModelUtils:
     """
     A utility class for handling KNN regression models, including data standardization,
     training, prediction, and evaluation.
     """
+
     _scaler: StandardScaler = StandardScaler()
     _model: KNeighborsRegressor = None
 
@@ -33,9 +35,14 @@ class ModelUtils:
         r2 = r2_score(y_true, y_pred)
         mse = mean_squared_error(y_true, y_pred)
         rmse = np.sqrt(mse)
-        mape = np.mean(np.abs((y_true - y_pred) / y_true)) * 100 if np.all(y_true) else np.inf
+        mape = (
+            np.mean(np.abs((y_true - y_pred) / y_true)) * 100
+            if np.all(y_true)
+            else np.inf
+        )
         smape = (
-            100 * np.mean(2 * np.abs(y_pred - y_true) / (np.abs(y_true) + np.abs(y_pred)))
+            100
+            * np.mean(2 * np.abs(y_pred - y_true) / (np.abs(y_true) + np.abs(y_pred)))
             if np.all(y_true + y_pred)
             else np.inf
         )
@@ -46,11 +53,13 @@ class ModelUtils:
             "Mean Squared Error (MSE)": mse,
             "R Squared": r2,
             "Mean Absolute Percentage Error (MAPE)": mape,
-            "Symmetric Mean Absolute Percentage Error (sMAPE)": smape
+            "Symmetric Mean Absolute Percentage Error (sMAPE)": smape,
         }
 
     @classmethod
-    def cross_validate(cls, X: np.ndarray, y: np.ndarray, n_splits: int = 5, n_neighbors: int = 5) -> Dict[str, Any]:
+    def train_and_cross_validate(
+        cls, X: np.ndarray, y: np.ndarray, n_splits: int = 5, n_neighbors: int = 5
+    ) -> Dict[str, Any]:
         """
         Perform k-fold cross-validation and compute metrics for training and test sets.
 
@@ -82,7 +91,9 @@ class ModelUtils:
 
             # Train Model & Measure training time
             start_train_time = time.time()
-            cls._model = KNeighborsRegressor(n_neighbors=n_neighbors, weights='distance')
+            cls._model = KNeighborsRegressor(
+                n_neighbors=n_neighbors, weights="distance"
+            )
             cls._model.fit(X_train_scaled, y_train)
             end_train_time = time.time()
             train_time = end_train_time - start_train_time
@@ -95,7 +106,7 @@ class ModelUtils:
             end_inference_time = time.time()
             inference_time = end_inference_time - start_inference_time
             total_inference_time += inference_time
-            
+
             # Collect predictions for the test set
             all_y_true.extend(y_test)
             all_y_pred.extend(y_test_pred)
@@ -129,28 +140,26 @@ class ModelUtils:
         }
 
     @staticmethod
-    def plot_predictions(y_true: np.ndarray, y_pred: np.ndarray, file_path: str = './figures/Cross-Validation Prediction vs True Values.png') -> None:
+    def print_metrics(metrics: Dict[str, Dict[str, float]]) -> None:
         """
-        Plot predictions against true values.
+        Print resulting averaged metrics of cross-validation for training and test set.
 
         Args:
-            y_true (np.ndarray): True labels.
-            y_pred (np.ndarray): Predicted labels.
-            title (str): Title of the plot.
+            metrics (Dict[str, Dict[str, float]]): Dictionary containing another dictionary of metrics per training and test set each.
+
+        Returns:
+            None: Prints evaluation metrics.
         """
-        plt.figure(figsize=(8, 6))
-        plt.scatter(y_true, y_pred, alpha=0.6, color='blue', edgecolor='k', label='Predictions')
-        plt.plot([y_true.min(), y_true.max()], [y_true.min(), y_true.max()], 'r--', linewidth=2, label='Ideal Line (y=x)')
-        plt.title("Cross-Validation Prediction vs True Values")
-        plt.xlabel("True Values")
-        plt.ylabel("Predicted Values")
-        plt.legend()
-        plt.grid(True)
-        plt.savefig(file_path, format='png', dpi=300, bbox_inches='tight')
-        plt.close() # Close plot to free memory
-    
+        print("\nCross-Validation Metrics (Averaged):")
+        for dataset, dataset_metrics in metrics.items():
+            print(f"\n{dataset.capitalize()} Metrics:")
+            for metric, value in dataset_metrics.items():
+                print(f"{metric}: {value:.4f}")
+
     @staticmethod
-    def print_sample_predictions(y_true: np.ndarray, y_pred: np.ndarray, num_samples: int = 10) -> None:
+    def print_sample_predictions(
+        y_true: np.ndarray, y_pred: np.ndarray, num_samples: int = 10
+    ) -> None:
         """
         Print a sample of predictions vs true values.
 
@@ -158,15 +167,59 @@ class ModelUtils:
             y_true (np.ndarray): True labels.
             y_pred (np.ndarray): Predicted labels.
             num_samples (int): Number of samples to display.
+
+        Returns:
+            None: Prints a sample of predictions vs true values.
         """
-        sample_df = pd.DataFrame({
-            "True Value": y_true,
-            "Predicted Value": y_pred
-        }).head(num_samples)
+        sample_df = pd.DataFrame(
+            {"True Value": y_true, "Predicted Value": y_pred}
+        ).head(num_samples)
 
         print("\nSample Predictions:")
         print(sample_df.to_string(index=False, float_format="{:.2f}".format))
-    
+
+    @staticmethod
+    def plot_predictions(
+        y_true: np.ndarray,
+        y_pred: np.ndarray,
+        file_path: str = "./figures/Cross-Validation Prediction vs True Values.png",
+    ) -> None:
+        """
+        Plot predictions against true values.
+
+        Args:
+            y_true (np.ndarray): True labels.
+            y_pred (np.ndarray): Predicted labels.
+            title (str): Title of the plot.
+
+        Returns:
+            None: Generates a scatterplot allowing the comparison and analysis of predictions vs true values.
+        """
+        plt.figure(figsize=(8, 6))
+        plt.scatter(
+            y_true,
+            y_pred,
+            alpha=0.6,
+            color="#1542C9",
+            edgecolor="k",
+            label="Predictions",
+        )
+        plt.plot(
+            [y_true.min(), y_true.max()],
+            [y_true.min(), y_true.max()],
+            color="#64D78C",
+            linestyle="--",
+            linewidth=2,
+            label="Ideal Line (y=x)",
+        )
+        plt.title("Cross-Validation Prediction vs True Values")
+        plt.xlabel("True Values")
+        plt.ylabel("Predicted Values")
+        plt.legend()
+        plt.grid(True)
+        plt.savefig(file_path, format="png", dpi=300, bbox_inches="tight")
+        plt.close()  # Close plot to free memory
+
     @staticmethod
     def calculate_avg_neighbor_distances(X_test_scaled: np.ndarray) -> np.ndarray:
         """
@@ -181,29 +234,34 @@ class ModelUtils:
         distances, _ = ModelUtils._model.kneighbors(X_test_scaled)
         avg_distances = distances.mean(axis=1)
         return avg_distances
-    
+
     @staticmethod
-    def plot_avg_neighbor_distances(avg_distances: List[float], file_path : str = "./figures/Distribution of Average Neighbor Distances.png") -> None:
+    def plot_avg_neighbor_distances(
+        avg_distances: List[float],
+        file_path: str = "./figures/Distribution of Average Neighbor Distances.png",
+    ) -> None:
         """
         Visualize the distribution of average neighbor distances.
 
         Args:
             avg_distances (List[float]): A list of average distances to nearest neighbors for test instances.
-        
+
         Returns:
             None: This function generates a histogram plot with a KDE (Kerne Density Estimate).
         """
         plt.figure(figsize=(10, 6))
-        sns.histplot(avg_distances, kde=True, bins=30, color='blue')
+        sns.histplot(avg_distances, kde=True, bins=30, color="#1542C9")
         plt.title("Distribution of Average Neighbor Distances", fontsize=16)
         plt.xlabel("Average Distances", fontsize=14)
         plt.ylabel("Frequency", fontsize=14)
         plt.grid(alpha=0.4)
-        plt.savefig(file_path, format='png', dpi=300, bbox_inches='tight')
+        plt.savefig(file_path, format="png", dpi=300, bbox_inches="tight")
         plt.close()
 
     @staticmethod
-    def permutation_importance(X: np.ndarray, y: np.ndarray, n_repeats: int = 10) -> Dict[str, float]:
+    def calc_permutation_importance(
+        X: np.ndarray, y: np.ndarray, n_repeats: int = 10
+    ) -> Dict[str, float]:
         """
         Compute permutation importance for features.
 
@@ -211,7 +269,7 @@ class ModelUtils:
             X (np.ndarray): Feature set.
             y (np.ndarray): Target values.
             n_repeats (int): Number of shuffling repetitions.
-        
+
         Returns:
             Dict[str, float]: Importance scores for each feature.
         """
@@ -225,44 +283,42 @@ class ModelUtils:
                 np.random.shuffle(X_shuffled[:, i])  # Shuffle column i
                 score = r2_score(y, ModelUtils._model.predict(X_shuffled))
                 shuffled_scores.append(baseline_score - score)
-            
+
             avg_importance = np.mean(shuffled_scores)
             importances.append(avg_importance)
-        
+
         return dict(zip(range(X.shape[1]), importances))
-    
+
     @staticmethod
-    def plot_permutation_importance(permutation_scores: Dict[int, float], feature_names: List[str], file_path : str = "./figures/Permutation Feature Importance.png") -> None:
+    def plot_permutation_importance(
+        permutation_scores: Dict[int, float],
+        feature_names: List[str],
+        file_path: str = "./figures/Permutation Feature Importance.png",
+    ) -> None:
         """
         Visualize feature importance based on permutation scores.
-        
+
         Args:
-            permutation_scores (Dict[int, float]): A dictionary where the keys are feature indices 
+            permutation_scores (Dict[int, float]): A dictionary where the keys are feature indices
                                                 and the values are the computed importance scores.
             feature_names (List[str]): A list of feature names corresponding to the feature indices.
-        
+
         Returns:
             None: This function generates a horizontal bar chart to display feature importance.
-        
-        Example:
-            feature_names = ['price', 'latitude', 'longitude', 'living_area', 'garden', 
-                            'subtype_of_property', 'building_condition', 'equipped_kitchen', 
-                            'terrace', 'swimming_pool', 'facade_number']
-            
-            permutation_scores = ModelUtils.permutation_importance(X_scaled, y, n_repeats=10)
-            plot_permutation_importance(permutation_scores, feature_names)
         """
         # Sort permutation scores by importance (descending order)
-        sorted_importances = sorted(permutation_scores.items(), key=lambda x: x[1], reverse=True)
+        sorted_importances = sorted(
+            permutation_scores.items(), key=lambda x: x[1], reverse=True
+        )
         features, importances = zip(*sorted_importances)
         feature_labels = [feature_names[i] for i in features]
-        
+
         # Plot horizontal bar chart
         plt.figure(figsize=(12, 6))
-        plt.barh(feature_labels, importances, color='blue')
+        plt.barh(feature_labels, importances, color="#1542C9")
         plt.title("Permutation Feature Importance", fontsize=16)
         plt.xlabel("Importance Score", fontsize=14)
         plt.ylabel("Features", fontsize=14)
         plt.gca().invert_yaxis()  # Invert y-axis for better visualization
-        plt.savefig(file_path, format='png', dpi=300, bbox_inches='tight')
+        plt.savefig(file_path, format="png", dpi=300, bbox_inches="tight")
         plt.close()

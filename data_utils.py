@@ -1,6 +1,7 @@
 import pandas as pd
 from typing import Optional
 
+
 class DataUtils:
     """
     A utility class for handling common data preprocessing tasks.
@@ -17,24 +18,19 @@ class DataUtils:
         Returns:
             pd.DataFrame: The imported data.
         """
-        if 'csv' in file_path:
+        if "csv" in file_path:
             return pd.read_csv(file_path)
-        if 'xlsx' in file_path:
+        if "xlsx" in file_path:
             return pd.read_excel(file_path)
 
-    @staticmethod
-    def export_csv(df: pd.DataFrame, file_path: str) -> None:
-        """
-        Exports a DataFrame to a CSV file.
-
-        Args:
-            df (pd.DataFrame): Data to be exported.
-            file_path (str): Path where the CSV file will be saved.
-        """
-        df.to_csv(file_path, index=False)
-
     @classmethod
-    def handle_missing_values(cls, df: pd.DataFrame, column: str, strategy: str = 'fill', fill_value: str = 'Unknown') -> pd.DataFrame:
+    def handle_missing_values(
+        cls,
+        df: pd.DataFrame,
+        column: str,
+        strategy: str = "fill",
+        fill_value: str = "Unknown",
+    ) -> pd.DataFrame:
         """
         Handles missing values in a specified column.
 
@@ -50,9 +46,9 @@ class DataUtils:
         Raises:
             ValueError: If an invalid strategy is provided.
         """
-        if strategy == 'fill':
+        if strategy == "fill":
             df.loc[:, column] = df[column].fillna(fill_value)
-        elif strategy == 'drop':
+        elif strategy == "drop":
             df.dropna(subset=[column], inplace=True)
         else:
             raise ValueError("Strategy must be 'fill' or 'drop'.")
@@ -60,7 +56,7 @@ class DataUtils:
 
     @classmethod
     def fill_missing_with_mode(
-        cls, df: pd.DataFrame, column: str, strategy: str = 'fill'
+        cls, df: pd.DataFrame, column: str, strategy: str = "fill"
     ) -> pd.DataFrame:
         """
         Handles missing values for a specific column by filling them with the mode.
@@ -73,10 +69,10 @@ class DataUtils:
         Returns:
             pd.DataFrame: The DataFrame with missing values filled with the mode or dropped.
         """
-        if strategy == 'fill':
+        if strategy == "fill":
             mode_value = df[column].mode()[0]
             df.loc[:, column] = df[column].fillna(mode_value)
-        elif strategy == 'drop':
+        elif strategy == "drop":
             df.dropna(subset=[column], inplace=True)
         else:
             raise ValueError("Strategy must be 'fill' or 'drop'.")
@@ -84,7 +80,7 @@ class DataUtils:
 
     @classmethod
     def fill_missing_by_group(
-        cls, df: pd.DataFrame, column: str, group_column: str, agg_func: str = 'median'
+        cls, df: pd.DataFrame, column: str, group_column: str, agg_func: str = "median"
     ) -> pd.DataFrame:
         """
         Fills missing values in a column based on a group-specific statistic (e.g., median, mean).
@@ -98,21 +94,27 @@ class DataUtils:
         Returns:
             pd.DataFrame: The DataFrame with missing values filled based on the group-specific statistic.
         """
-        if agg_func == 'median':
+        if agg_func == "median":
             fill_values = df.groupby(group_column)[column].median()
-        elif agg_func == 'mean':
+        elif agg_func == "mean":
             fill_values = df.groupby(group_column)[column].mean()
         else:
             raise ValueError("Aggregation function must be 'median' or 'mean'.")
-        
+
         df.loc[:, column] = df.apply(
-            lambda row: fill_values[row[group_column]] if pd.isnull(row[column]) else row[column],
-            axis=1
+            lambda row: (
+                fill_values[row[group_column]]
+                if pd.isnull(row[column])
+                else row[column]
+            ),
+            axis=1,
         )
         return df
 
     @classmethod
-    def remove_substring(cls, df: pd.DataFrame, column: str, substring: str) -> pd.DataFrame:
+    def remove_substring(
+        cls, df: pd.DataFrame, column: str, substring: str
+    ) -> pd.DataFrame:
         """
         Removes a specified substring from all values in a given column.
 
@@ -128,12 +130,13 @@ class DataUtils:
         return df
 
     @classmethod
-    def correct_value(cls, df: pd.DataFrame, column: str, old_value: str|int, new_value: str|int) -> pd.DataFrame:
-        df.loc[df[column] == old_value, column] = new_value
-        return df
-
-    @classmethod
-    def drop_outliers(cls, df: pd.DataFrame, column: str, lower_bound: Optional[float] = None, upper_bound: Optional[float] = None) -> pd.DataFrame:
+    def drop_outliers(
+        cls,
+        df: pd.DataFrame,
+        column: str,
+        lower_bound: Optional[float] = None,
+        upper_bound: Optional[float] = None,
+    ) -> pd.DataFrame:
         """
         Drops rows with values in a column outside specified bounds.
 
