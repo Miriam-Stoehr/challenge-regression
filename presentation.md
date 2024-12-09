@@ -91,7 +91,7 @@ To open the "black box" of the KNN model:
 
 * MAPE (Mean Absolute Percentage Error: 16.38%) and sMAPE (Symmetric MAPE: 14.79%): These values indicate a much larger relative error on the test set, emphasizing the need to address overfitting or test set inconsistencies.
 
-**4.3 Insight**
+**4.3 Insights**
 
 * Overfitting: The high training performance versus the drop on the test set suggests that the model is potentially overfitting to the training data.
 
@@ -104,3 +104,18 @@ To open the "black box" of the KNN model:
 * Regularization: Further feature selection or dimensionality reduction techniques (e.g., PCA) could be implemented to reduce noise in the dataset. Additional feature engineering could lead to improve the model's ability to generalize.
 
 * Data Augmentation: A balancing of the dataset by adding more data from underrepresented property types or region could improve predictions as well as addressing further outliers through capping or transformation techniques.
+
+## 5. Conclusion
+
+The KNN regression model is a strong starting point for predicting real-estate prices due to its simplicity, transparency, and adaptability to localized trends. 
+
+While the model has its limitations, careful data preprocessing and strategic optimizations can make it a valuable tool for this task. 
+
+## Data Sources:
+
+* Real-estate property data:
+  * https://www.immoweb.be
+
+* Statbel datasets for income and commune NIS-codes
+  * https://statbel.fgov.be/en/themes/households/taxable-income#figures
+  * https://statbel.fgov.be/nl/over-statbel/methodologie/classificaties/geografie
