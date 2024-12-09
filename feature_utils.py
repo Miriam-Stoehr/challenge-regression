@@ -1,7 +1,8 @@
 import pandas as pd
+from math import radians, sin, cos, sqrt, atan2
 from sklearn.preprocessing import OrdinalEncoder, StandardScaler
 from sklearn.cluster import DBSCAN
-from typing import List
+from typing import Dict, List
 
 class FeatureUtils:
     @classmethod
@@ -204,6 +205,64 @@ class FeatureUtils:
         # Rename reversed column
         df = df.rename(columns={f'{new_column}_reversed': new_column})
 
+        return df
+
+    @staticmethod
+    def haversine(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+        """
+        Calculate the Haversine distance between two points on the Earth specified by their latitude and longitude.
+
+        Args:
+            lat1 (float): First latitude point.
+            lon1 (float): First longitude point.
+            lat2 (float): Second latitude point.
+            lon2 (float): Second longitude point.
+        
+        Returns:
+            float: Haversine distance between two sets of coordinates, measured in kilometers.
+        """
+        # Convert degrees to radians
+        lat1, lon1, lat2, lon2 = map(radians, [lat1, lon1, lat2, lon2])
+
+        # Haversine formula
+        dlon = lon2 - lon1
+        dlat = lat2 - lat1
+        a = sin(dlat / 2)**2 + cos(lat1) * cos(lat2) * sin(dlon / 2)**2
+        c = 2 * atan2(sqrt(a), sqrt(1 - a))
+        R = 6371 # Radius of Earth in km
+        return R * c
+
+    @classmethod
+    def calculate_nearest_city_distance(cls, df: pd.DataFrame, cities: Dict[str, List[float]]) -> pd.DataFrame:
+        """
+        Calculates the minimum distance from each commune to the nearest city and adds it as a new column.
+        
+        Args:
+            df (pd.DataFrame): DataFrame with communes and their latitude/longitude columns.
+            cities (Dict[str, List[float]]): Dictionary with city names as keys and their (latitude, longitude) as values.
+        
+        Returns:
+            pd.DataFrame: The DataFrame with an additional 'min_distance' column.
+        """
+        # Calculate the minimum distance to the nearest city for each commune
+        min_distances = []
+
+        for _, row in df.iterrows():
+            lat_commune = row['latitude']
+            lon_commune = row['longitude']
+
+            min_distance = float('inf')   # Start with an infinitely large distance
+
+            # Iterate through each city in the dictionary and calculate the distance
+            for city, (lat_city, lon_city) in cities.items():
+                distance = cls.haversine(lat_commune, lon_commune, lat_city, lon_city)
+                if distance < min_distance:
+                    min_distance = distance
+            
+            min_distances.append(min_distance)
+        
+        # Add the minimum distances to the DataFrame as a new column
+        df['min_distance'] = min_distances
         return df
 
 

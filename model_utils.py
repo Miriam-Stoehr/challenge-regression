@@ -129,7 +129,7 @@ class ModelUtils:
         }
 
     @staticmethod
-    def plot_predictions(y_true: np.ndarray, y_pred: np.ndarray, title: str = 'Predictions vs True Values') -> None:
+    def plot_predictions(y_true: np.ndarray, y_pred: np.ndarray, file_path: str = './figures/Cross-Validation Prediction vs True Values.png') -> None:
         """
         Plot predictions against true values.
 
@@ -141,12 +141,13 @@ class ModelUtils:
         plt.figure(figsize=(8, 6))
         plt.scatter(y_true, y_pred, alpha=0.6, color='blue', edgecolor='k', label='Predictions')
         plt.plot([y_true.min(), y_true.max()], [y_true.min(), y_true.max()], 'r--', linewidth=2, label='Ideal Line (y=x)')
-        plt.title(title)
+        plt.title("Cross-Validation Prediction vs True Values")
         plt.xlabel("True Values")
         plt.ylabel("Predicted Values")
         plt.legend()
         plt.grid(True)
-        plt.show()
+        plt.savefig(file_path, format='png', dpi=300, bbox_inches='tight')
+        plt.close() # Close plot to free memory
     
     @staticmethod
     def print_sample_predictions(y_true: np.ndarray, y_pred: np.ndarray, num_samples: int = 10) -> None:
@@ -182,7 +183,7 @@ class ModelUtils:
         return avg_distances
     
     @staticmethod
-    def plot_avg_neighbor_distances(avg_distances: List[float]) -> None:
+    def plot_avg_neighbor_distances(avg_distances: List[float], file_path : str = "./figures/Distribution of Average Neighbor Distances.png") -> None:
         """
         Visualize the distribution of average neighbor distances.
 
@@ -193,12 +194,13 @@ class ModelUtils:
             None: This function generates a histogram plot with a KDE (Kerne Density Estimate).
         """
         plt.figure(figsize=(10, 6))
-        sns.histplot(avg_distances, kde=True, bins=30, color='skyblue')
+        sns.histplot(avg_distances, kde=True, bins=30, color='blue')
         plt.title("Distribution of Average Neighbor Distances", fontsize=16)
         plt.xlabel("Average Distances", fontsize=14)
         plt.ylabel("Frequency", fontsize=14)
         plt.grid(alpha=0.4)
-        plt.show()
+        plt.savefig(file_path, format='png', dpi=300, bbox_inches='tight')
+        plt.close()
 
     @staticmethod
     def permutation_importance(X: np.ndarray, y: np.ndarray, n_repeats: int = 10) -> Dict[str, float]:
@@ -230,7 +232,7 @@ class ModelUtils:
         return dict(zip(range(X.shape[1]), importances))
     
     @staticmethod
-    def plot_permutation_importance(permutation_scores: Dict[int, float], feature_names: List[str]) -> None:
+    def plot_permutation_importance(permutation_scores: Dict[int, float], feature_names: List[str], file_path : str = "./figures/Permutation Feature Importance.png") -> None:
         """
         Visualize feature importance based on permutation scores.
         
@@ -257,10 +259,10 @@ class ModelUtils:
         
         # Plot horizontal bar chart
         plt.figure(figsize=(12, 6))
-        plt.barh(feature_labels, importances, color='teal')
+        plt.barh(feature_labels, importances, color='blue')
         plt.title("Permutation Feature Importance", fontsize=16)
         plt.xlabel("Importance Score", fontsize=14)
         plt.ylabel("Features", fontsize=14)
         plt.gca().invert_yaxis()  # Invert y-axis for better visualization
-        plt.grid(alpha=0.4)
-        plt.show()
+        plt.savefig(file_path, format='png', dpi=300, bbox_inches='tight')
+        plt.close()

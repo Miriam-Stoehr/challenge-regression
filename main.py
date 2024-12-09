@@ -1,11 +1,16 @@
 from data_utils import DataUtils
 from feature_utils import FeatureUtils
 from model_utils import ModelUtils
+import json
 
 def main():
     # Import data
-    file_path = "./data/real_estate.csv"
+    file_path = "./data/real_estate_w_coordinates.csv"
     df = DataUtils.import_data(file_path)
+
+    # Load city coordinates from JSON file
+    with open("./data/city_coordinates.json", "r") as json_file:
+        city_coordinates_dict = json.load(json_file)
 
 
     """Data Cleaning"""
@@ -27,11 +32,6 @@ def main():
 
     # Remove substring 'unit' from 'subtype_of_property'
     df = DataUtils.remove_substring(df, 'subtype_of_property', ' unit')
-
-    # Correct value for commune
-    df = DataUtils.correct_value(df, column='commune', old_value='Petit-Rulx-lez-Nivelles', new_value='Petit-Rœulx-lez-Nivelles')
-
-
 
 
     """Data Encoding & Feature Engineering"""
@@ -109,6 +109,7 @@ def main():
     # Use Standard Ordinal Encoding on communes
     df = FeatureUtils.encode_ordinal(df, column='commune')
 
+
     """ Feature Engineering Based on External Data"""
 
     # Import external datasets (refnis code and taxable income per commune)
@@ -131,13 +132,12 @@ def main():
         min_samples=4
     )
 
+    # Calculate distances to nearest of 10 largest cities of Belgium and add 'min_distance' column
+    df = FeatureUtils.calculate_nearest_city_distance(df, city_coordinates_dict)
+
     # Select features for ML model & split data
     target = 'price'
-    features = ['commune_encoded', 'zip_code', 'living_area', 'building_condition_encoded', 'terrace_encoded', 'equipped_kitchen_encoded', 'subtype_of_property_encoded', 'com_avg_income', 'commune_income_cluster']
-
-    # TODO: 
-    df = df[['price', 'commune_encoded', 'zip_code', 'living_area', 'building_condition_encoded', 'terrace_encoded', 'equipped_kitchen_encoded', 'subtype_of_property_encoded', 'com_avg_income', 'commune_income_cluster']]
-    df.to_csv("./data/real_estate_selected.csv")
+    features = ['living_area', 'com_avg_income', 'building_condition_encoded', 'subtype_of_property_encoded', 'latitude', 'longitude', 'equipped_kitchen_encoded', 'min_distance', 'terrace_encoded']
 
 
     """Assigning variables, splitting test and training set & standardizing features"""
@@ -147,7 +147,7 @@ def main():
 
     # Perform k-fold cross-validation
     n_splits = 5
-    n_neighbors = 5
+    n_neighbors = 8
 
     results = ModelUtils.cross_validate(X, y, n_splits=n_splits, n_neighbors=n_neighbors)
     metrics = results["metrics"]
@@ -170,26 +170,32 @@ def main():
     # Compute distance-based analysis
     X_scaled = ModelUtils._scaler.transform(X)
     avg_distances = ModelUtils.calculate_avg_neighbor_distances(X_scaled)
-    print("\nAverage Neighbor Distances (First 10 Instances):")
-    print(avg_distances[:10])
+    # TODO:
+    """print("\nAverage Neighbor Distances (First 10 Instances):")
+    print(avg_distances[:10])"""
 
-"""    # Compute permutation importance
+    # Compute permutation importance
     permutation_scores = ModelUtils.permutation_importance(X_scaled, y, n_repeats=10)
-    print("\nPermutation Importance Scores:")
+    # TODO:
+    """print("\nPermutation Importance Scores:")
     for feature_idx, importance in permutation_scores.items():
-        print(f"Feature {features[feature_idx]}: {importance:.4f}")
+        print(f"Feature {features[feature_idx]}: {importance:.4f}")"""
 
     # Plot distribution of average distances
-    ModelUtils.plot_avg_neighbor_distances(avg_distances)
+    ModelUtils.plot_avg_neighbor_distances(avg_distances, file_path="./figures/Distribution of Average Neighbor Distances.png")
 
     # Plot permutation importance
-    ModelUtils.plot_permutation_importance(permutation_scores, features)
+    ModelUtils.plot_permutation_importance(permutation_scores, features, file_path="./figures/Permutation Feature Importance.png")
 
+    # TODO:
     # Print a sample of predictions
-    ModelUtils.print_sample_predictions(y_true, y_pred, num_samples=10)
+    #ModelUtils.print_sample_predictions(y_true, y_pred, num_samples=10)
 
     # Plot predictions vs true values
-    ModelUtils.plot_predictions(y_true, y_pred, title="Cross-Validation Predictions vs True Values")"""
+    ModelUtils.plot_predictions(y_true, y_pred, file_path="./figures/Cross-Validation Predictions vs True Values.png")
+
+    # Print Notification
+    print("Performance graphs were saved to '/figures'.")
 
 if __name__ == "__main__":
     main()
