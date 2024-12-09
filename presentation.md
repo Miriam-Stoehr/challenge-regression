@@ -24,10 +24,23 @@ The dataset contains current real-estate data, including features such as:
 * Location: Latitude and longitude of the property.
 * Additional Features: Minimum distance to major cities, communal average income.
 
-**2.2 Feature Engineering**
+**2.2 Feature Engineering and Selection**
 
-* Categorical Encoding: Property types and building conditions were encoded numerically to make them compatible with the algorithm.
+* Features were selected based on:
+  * Correlation coefficients (Spearman method).
+  * Contribution to model metrics (evaluated iteratively).
+
+* Strongly correlated features (e.g. `bedroom_nr`) were excluded to avoid redundancy and potential data leakage.
+
+* Encoding:
+  * Categories like kitchen equipment, property subtype, and building condition were label-encoded to represent ordinal relationships and to make them compatible with the algorithm.
+  * Binary encoding was used for terrace availability, due to inconsistencies in the availability of the indication of terrace surface on Immoweb.
+
+* Features excluded despite better evaluation metrics to avoid overweighing location data:
+  * `zip_code` and `refnis_code` (reformed NIS-code for communes)
+
 * Derived Features: Distances to major cities were computed to capture regional effects on pricing.
+
 * Standardized Features: To ensure fair comparison across dimensions, continuous features (e.g., living area, latitude, longitude) were standardized.
 
 **2.3 Dataset Challenges and Limitations**
@@ -47,6 +60,16 @@ KNN regression predicts a target value (price) by identifying the `k` closest da
 **3.2 Cross-validation for Robustness**
 
 K-fold cross-validation was implemented to assess the model's performance across multiple data splits, ensuring robust and reliable results.
+
+* A 5-fold cross-validation was used:
+
+  * Splits the dataset into 5 subsets (folds), using one for testing and the remaining four for training in each iteration.
+
+  * Each fold serves as a validation set once, while the remaining folds are used for training.
+  
+* Cross-validation ensures the model is robust and is evaluated multiple times on different subsets of the data, which prevents the model from being overly reliant on any one test set. By training on different parts of the data, it ensures that the model learns from the data as a whole, rather than memorizing a specific split.
+  
+* Cross-validation is particularly important for KNN models because they are non-parametric and rely heavily on local patterns in the data. This approach evaluates the model's ability to generalize to unseen data more reliably.
 
 **3.3 Model Evaluation Metrics**
 
