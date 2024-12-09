@@ -1,27 +1,7 @@
 # Evaluation Report
 ## ImmoEliza KNN Regression Model
 
-### Content
 
-* Code snippet of the model instantiation and parameters,...
-* Evaluation metrics: 
-  * MAE (on training/test)
-  * RMSE (on training/test)
-  * R2 (on training/test)
-  * MAPE (on training/test)
-  * sMAPE (on training/test)
-  
-* List of features and how you got it (to quickly understand if you've done data leakage)
-  
-* Accuracy computing procedure (on a test set? What split %, 80/20, 90/10, 50/50? k-fold cross?)
-
-* Efficiency (training and inference time). 
-
-* Quick presentation of the final dataset 
-  * How many records, 
-  * did you merge some datasets together? 
-  * did you scrape again? 
-  * what cleaning step you've done, scaling, encoding, cross-validation. (No need of visuals, just bullet points)
 
 ### Model Instantiation Code
 
