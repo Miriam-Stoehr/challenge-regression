@@ -182,7 +182,7 @@ class ModelUtils:
     def plot_predictions(
         y_true: np.ndarray,
         y_pred: np.ndarray,
-        file_path: str = "./figures/Cross-Validation Prediction vs True Values.png",
+        file_path: str = "./graphs/predictions.png",
     ) -> None:
         """
         Plot predictions against true values.
@@ -238,7 +238,7 @@ class ModelUtils:
     @staticmethod
     def plot_avg_neighbor_distances(
         avg_distances: List[float],
-        file_path: str = "./figures/Distribution of Average Neighbor Distances.png",
+        file_path: str = "./graphs/avg_distances.png",
     ) -> None:
         """
         Visualize the distribution of average neighbor distances.
@@ -293,7 +293,7 @@ class ModelUtils:
     def plot_permutation_importance(
         permutation_scores: Dict[int, float],
         feature_names: List[str],
-        file_path: str = "./figures/Permutation Feature Importance.png",
+        file_path: str = "./graphs/permutation_importance.png",
     ) -> None:
         """
         Visualize feature importance based on permutation scores.

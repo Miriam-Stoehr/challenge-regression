@@ -8,11 +8,11 @@ REFNIS_FILE_PATH = "./data/postal_refnis_conv.xlsx"
 
 INCOME_FILE_PATH = "./data/taxable_income.xlsx"
 
-PREDICTIONS_FILE_PATH = "./graphs/Cross-Validation Predictions vs True Values.png"
+PREDICTIONS_FILE_PATH = "./graphs/predictions.png"
 
-DISTANCES_FILE_PATH = "./graphs/Distribution of Average Neighbor Distances.png"
+DISTANCES_FILE_PATH = "./graphs/avg_distances.png"
 
-PERMUTATION_FILE_PATH = "./graphs/Permutation Feature Importance.png"
+PERMUTATION_FILE_PATH = "./graphs/permutation_importance.png"
 
 KNN_N_NEIGHBORS = 8
 

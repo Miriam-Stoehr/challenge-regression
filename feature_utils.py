@@ -188,18 +188,3 @@ class FeatureUtils:
         # Add the minimum distances to the DataFrame as a new column
         df["min_distance"] = min_distances
         return df
-
-    @classmethod
-    def select_features(cls, df: pd.DataFrame, features: list) -> pd.DataFrame:
-        """
-        Produces a subset based on the provided column names.
-
-        Args:
-            df (pd.DataFrame): Input DataFrame.
-            features (list): List of the columns to be selected.
-
-        Returns:
-            pd.DataFrame: Resulting subset.
-        """
-        df_selected = df[features]
-        return df_selected

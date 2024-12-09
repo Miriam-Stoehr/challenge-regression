@@ -108,12 +108,12 @@ def main():
     # Calculate distances to nearest of 10 largest cities of Belgium and add 'min_distance' column
     df = FeatureUtils.calculate_nearest_city_distance(df, city_coordinates_dict)
 
-    """Assigning variables, splitting test and training set & standardizing features"""
+    """Split test and training set & standardize features"""
+    # Assign target and feature variables (convert to NumPy array for compatibility with k-fold)
+    y = df[TARGET].values  
+    X = df[FEATURES].values
 
-    y = df[TARGET].values  # Convert to NumPy array for compatibility with k-fold
-    X = FeatureUtils.select_features(df, features=FEATURES).values
-
-    # Perform k-fold cross-validation
+    # Train model & perform k-fold cross-validation
     results = ModelUtils.train_and_cross_validate(
         X, y, n_splits=CV_N_SPLITS, n_neighbors=KNN_N_NEIGHBORS
     )
